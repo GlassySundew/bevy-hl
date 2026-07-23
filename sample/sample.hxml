@@ -1,0 +1,5 @@
+-cp ../haxe
+-cp .
+-main Main
+-hl sample.hl
+

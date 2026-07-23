@@ -1,0 +1,48 @@
+# Rust / Cargo
+/target/
+
+# CMake and native build trees
+/build-*/
+/build/
+/cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+*.vcxproj.user
+
+# Native compiler and linker outputs
+*.obj
+*.o
+*.lib
+*.a
+*.exp
+*.pdb
+*.ilk
+*.dll
+*.so
+*.dylib
+*.exe
+
+# HashLink outputs
+*.hl
+*.hdll
+*.hashlink
+
+# Haxe compiler dumps and generated diagnostics
+/dump/
+/**/dump/
+*.dump
+
+# Haxelib local state
+/.haxelib/
+
+# Editors and operating systems
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini

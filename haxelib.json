@@ -1,0 +1,11 @@
+{
+    "name": "bevy-hl",
+    "url": "https://github.com/GlassySundew/hashlink",
+    "license": "MIT",
+    "tags": ["hashlink", "ecs", "bevy"],
+    "description": "Experimental Bevy ECS bridge for the Haxe HashLink target.",
+    "version": "0.6.0",
+    "releasenote": "Caches component IDs and persistent Bevy QueryState snapshots, with bulk row transfer for allocation-light system iteration.",
+    "contributors": ["GlassySundew"],
+    "classPath": "haxe"
+}

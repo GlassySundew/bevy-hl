@@ -1,0 +1,1 @@
+typedef LegacyEntity = bevy.Entity;
