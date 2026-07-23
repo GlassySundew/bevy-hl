@@ -344,11 +344,10 @@ class SystemBuilder {
 				$queryTarget = world.getQuery( [$a{required}], [$a{excluded}] ) );
 			for ( optional in binding.optionalIds ) {
 				final target = fieldExpr( optional.fieldName, optional.component.typeExpr.pos );
-				body.push( macro $target = world.registerComponent(
-					$v{optional.component.id},
-					$v{optional.component.typeName},
-					$v{optional.component.sparse}
-				) );
+				body.push( macro {
+					world.ensureComponentRegistered( $v{optional.component.id} );
+					$target = $v{optional.component.id};
+				} );
 			}
 		}
 		return( macro class GeneratedQueryInitialization {
@@ -373,16 +372,8 @@ class SystemBuilder {
 	static function makeEventRegistration( listeners : Array<EventListener> ) : Field {
 		final registrations : Array<Expr> = [macro super.__registerEventHandlers__()];
 		for ( listener in listeners ) {
-			final componentIds = listener.components.map( component -> macro world.registerComponent(
-				$v{component.id},
-				$v{component.typeName},
-				$v{component.sparse}
-			) );
-			final excludedIds = listener.excludes.map( component -> macro world.registerComponent(
-				$v{component.id},
-				$v{component.typeName},
-				$v{component.sparse}
-			) );
+			final componentIds = listener.components.map( component -> macro $v{component.id} );
+			final excludedIds = listener.excludes.map( component -> macro $v{component.id} );
 			final args : Array<Expr> = [];
 			for ( index in 0...listener.fn.args.length ) {
 				if ( index == listener.eventIndex ) {

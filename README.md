@@ -24,7 +24,9 @@ dense compile-time bridge ID. Generated component access uses integer literals;
 there are no runtime type-name hashes or registration calls in the hot path.
 When a world starts, it registers every discovered descriptor with Bevy once.
 Because Bevy owns its internal `ComponentId` allocation, Rust retains a compact
-per-world vector from bridge ID to Bevy ID.
+per-world vector from bridge ID to Bevy ID. Dense IDs are recovered from
+module-bound resources when `--connect` reuses a cached module, so incremental
+compilation does not depend on macro execution order.
 
 ## Current API
 

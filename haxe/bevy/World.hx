@@ -33,6 +33,7 @@ class World {
 		nativeHandle = Native.world_new();
 		if ( nativeHandle == null )
 			throw "Could not create Bevy world";
+		synchronizeComponentCatalog();
 		eventBus = new EventBus();
 		resources = new ResourceStore();
 		activeSystems = new SystemList( this, "ActiveSystems" );
@@ -226,6 +227,7 @@ class World {
 	public function componentsOf( entity : Entity ) : Array<DynamicComponentStorage> {
 
 		ensureOpen();
+		synchronizeComponentCatalog();
 		if ( !entityExists( entity ) ) return [];
 		final result = new Array<DynamicComponentStorage>();
 		for ( storage in registeredComponentStorages )
@@ -239,7 +241,7 @@ class World {
 		value : Dynamic
 	) : Void {
 
-		ensureComponentRegistered( component );
+		ensureOpen();
 		if ( !Native.component_insert( nativeHandle, entity.handle, component, value ) )
 			throw 'Could not insert component $component into $entity';
 	}
@@ -249,7 +251,7 @@ class World {
 		component : Int
 	) : Dynamic {
 
-		ensureComponentRegistered( component );
+		ensureOpen();
 		return Native.component_get( nativeHandle, entity.handle, component );
 	}
 
@@ -258,14 +260,23 @@ class World {
 		component : Int
 	) : Bool {
 
-		ensureComponentRegistered( component );
+		ensureOpen();
 		return Native.component_has( nativeHandle, entity.handle, component );
 	}
 
 	@:noCompletion public inline function removeDynamic( entity : Entity, component : Int ) : Bool {
 
-		ensureComponentRegistered( component );
+		ensureOpen();
 		return Native.component_remove( nativeHandle, entity.handle, component );
+	}
+
+	/** Registers every component descriptor generated for this binary. */
+	@:noCompletion public function synchronizeComponentCatalog() : Void {
+
+		ensureOpen();
+		for ( id => definition in ComponentCatalog.all() )
+			if ( definition != null && registeredComponentId( id ) < 0 )
+				registerComponent( id, definition.name, definition.sparse );
 	}
 
 	/** Registers a macro-assigned component ID once in this native world. */
@@ -290,10 +301,10 @@ class World {
 		);
 		if ( registered != compileId )
 			throw 'Could not register component $name at bridge id $compileId';
+		final storage = new DynamicComponentStorage( this, registered, name, sparse );
 		while ( registeredComponentStorages.length <= compileId )
 			registeredComponentStorages.push( null );
-		registeredComponentStorages[compileId] =
-			new DynamicComponentStorage( this, registered, name, sparse );
+		registeredComponentStorages[compileId] = storage;
 		return registered;
 	}
 
@@ -306,24 +317,17 @@ class World {
 		return storage == null ? -1 : storage.storageId;
 	}
 
-	/** Resolves the cached native ID, registering only on the first use. */
-	@:noCompletion public function resolveComponent(
-		compileId : Int,
-		name : String,
-		sparse : Bool
-	) : Int {
-
-		final registered = registeredComponentId( compileId );
-		return registered >= 0 ? registered : registerComponent( compileId, name, sparse );
-	}
-
 	/** Validates a macro-assigned ID before native component access. */
 	@:noCompletion public function ensureComponentRegistered( component : Int ) : Void {
 
 		ensureOpen();
-		if ( component < 0 || component >= registeredComponentStorages.length )
-			throw 'Component id $component is not registered in this world';
-		if ( registeredComponentStorages[component] == null )
+		if ( component < 0 ) throw 'Invalid component id $component';
+		if ( registeredComponentId( component ) < 0 ) {
+			final definition = ComponentCatalog.get( component );
+			if ( definition != null )
+				registerComponent( component, definition.name, definition.sparse );
+		}
+		if ( registeredComponentId( component ) < 0 )
 			throw 'Component id $component is not registered in this world';
 	}
 

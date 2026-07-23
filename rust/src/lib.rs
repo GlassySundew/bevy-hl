@@ -40,6 +40,7 @@ unsafe fn drop_haxe_root(ptr: OwningPtr<'_>) {
 pub struct BridgeWorld {
     world: World,
     component_ids: Vec<Option<ComponentId>>,
+    component_descriptors: Vec<Option<(String, bool)>>,
     entities: std::collections::HashMap<u32, Entity>,
     entity_handles: std::collections::HashMap<Entity, u32>,
     next_entity_handle: u32,
@@ -50,6 +51,7 @@ impl BridgeWorld {
         Self {
             world: World::new(),
             component_ids: Vec::new(),
+            component_descriptors: Vec::new(),
             entities: std::collections::HashMap::new(),
             entity_handles: std::collections::HashMap::new(),
             next_entity_handle: 1,
@@ -125,13 +127,15 @@ pub unsafe extern "C" fn bevy_rs_component_register(
     let Ok(name) = unsafe { CStr::from_ptr(name) }.to_str() else {
         return -1;
     };
-    if let Some(Some(id)) = world.component_ids.get(bridge_id as usize) {
-        let existing_sparse = world
-            .world
-            .components()
-            .get_info(*id)
-            .is_some_and(|info| info.storage_type() == StorageType::SparseSet);
-        return if existing_sparse == sparse {
+    if world.component_id(bridge_id).is_some() {
+        let existing_matches = world
+            .component_descriptors
+            .get(bridge_id as usize)
+            .and_then(Option::as_ref)
+            .is_some_and(|(existing_name, existing_sparse)| {
+                existing_name == name && *existing_sparse == sparse
+            });
+        return if existing_matches {
             bridge_id as i32
         } else {
             -2
@@ -161,8 +165,10 @@ pub unsafe extern "C" fn bevy_rs_component_register(
     let required_len = bridge_id as usize + 1;
     if world.component_ids.len() < required_len {
         world.component_ids.resize(required_len, None);
+        world.component_descriptors.resize(required_len, None);
     }
     world.component_ids[bridge_id as usize] = Some(id);
+    world.component_descriptors[bridge_id as usize] = Some((name.to_owned(), sparse));
     bridge_id as i32
 }
 
@@ -456,11 +462,12 @@ mod tests {
         let mut bridge = BridgeWorld::new();
         let bridge_ptr = &mut bridge as *mut BridgeWorld;
         let name = CString::new("test.Position").unwrap();
+        let bridge_id = 7;
         assert_eq!(
-            unsafe { bevy_rs_component_register(bridge_ptr, 7, name.as_ptr(), false) },
-            7
+            unsafe { bevy_rs_component_register(bridge_ptr, bridge_id, name.as_ptr(), false) },
+            bridge_id as i32
         );
-        assert!(bridge.component_id(7).is_some());
+        assert!(bridge.component_id(bridge_id).is_some());
         assert!(bridge.component_id(0).is_none());
     }
 }

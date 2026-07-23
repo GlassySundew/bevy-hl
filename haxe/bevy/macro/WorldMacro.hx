@@ -66,10 +66,6 @@ class WorldMacro {
             $b{requiredAssignments};
             final __bevyExcluded = new hl.NativeArray<Int>($v{excludedIds.length});
             $b{excludedAssignments};
-			for (__bevyComponent in __bevyRequired)
-				$world.ensureComponentRegistered(__bevyComponent);
-			for (__bevyComponent in __bevyExcluded)
-				$world.ensureComponentRegistered(__bevyComponent);
             final __bevyQuery = bevy.Native.query_new(
                 $world.nativeHandle,
                 __bevyRequired,
@@ -105,7 +101,7 @@ class WorldMacro {
     }
 
     static function registration(world:Expr, info:RegisteredComponent):Expr {
-        return macro $world.resolveComponent($v{info.id}, $v{info.name}, $v{info.sparse});
+        return macro $v{info.id};
     }
 
     static function componentList(expr:Expr):Array<RegisteredComponent> {
