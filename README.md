@@ -207,9 +207,7 @@ Listener parameters are interpreted as follows:
 - Class-level `@:priority(expression)` controls ordering within a list; higher
   priorities run first and equal priorities retain insertion order.
 
-Systems may be grouped into nested `SystemList` values. Each list owns a clock,
-so a low-frequency cleanup list can follow the same pattern as
-`OverworldLocationMain.registerUnitDisposers()`:
+Systems may be grouped into nested `SystemList` values, each list owns a clock.:
 
 ```haxe
 final anchorUpdates = new bevy.SystemList(world, "LocationAnchorUpdates");
