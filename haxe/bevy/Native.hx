@@ -19,6 +19,10 @@ typedef NativeValues = hl.NativeArray<Dynamic>;
 @:hlNative( "bevy" )
 class Native {
 
+	public static inline final COMPONENT_INSERT_FAILED = 0;
+	public static inline final COMPONENT_INSERTED = 1;
+	public static inline final COMPONENT_INSERT_DUPLICATE = 2;
+
 	public static function bridge_version() : Int {
 
 		return 0;
@@ -45,10 +49,11 @@ class Native {
 		world : NativeWorld,
 		entity : Int,
 		component : Int,
-		value : Dynamic
-	) : Bool {
+		value : Dynamic,
+		rejectDuplicate : Bool
+	) : Int {
 
-		return false;
+		return 0;
 	}
 
 	public static function component_get(

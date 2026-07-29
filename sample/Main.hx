@@ -86,6 +86,14 @@ class Main {
         world.add(moving, new Position(1, 2));
         world.add(moving, new Velocity(0.5, -1));
 		world.add( moving, ( 3 : PrimitiveFlag ) );
+		#if (debug || ecs_duplicate_add_check)
+		var duplicateAddRejected = false;
+		try world.add( moving, new Position( 99, 99 ) )
+		catch ( error : haxe.Exception )
+			duplicateAddRejected = error.message.indexOf( "duplicate component Position" ) >= 0;
+		if ( !duplicateAddRejected || world.get( moving, Position ).x != 1 )
+			throw "Duplicate component add check failed";
+		#end
 		final primitiveQuery = world.getQuery( [PrimitiveFlag] );
 		if ( primitiveQuery.length != 1
 			|| ( cast primitiveQuery.componentStorages[0].get( moving ) : PrimitiveFlag ) != 3 )

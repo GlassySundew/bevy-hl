@@ -242,7 +242,21 @@ class World {
 	) : Void {
 
 		ensureOpen();
-		if ( !Native.component_insert( nativeHandle, entity.handle, component, value ) )
+		final result = Native.component_insert(
+			nativeHandle,
+			entity.handle,
+			component,
+			value,
+			#if (debug || ecs_duplicate_add_check) true #else false #end
+		);
+		if ( result == Native.COMPONENT_INSERT_DUPLICATE ) {
+			final storage = component >= 0 && component < registeredComponentStorages.length
+				? registeredComponentStorages[component]
+				: null;
+			final componentName = storage == null ? Std.string( component ) : storage.componentType;
+			throw 'Cannot add duplicate component $componentName to $entity';
+		}
+		if ( result != Native.COMPONENT_INSERTED )
 			throw 'Could not insert component $component into $entity';
 	}
 

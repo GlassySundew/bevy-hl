@@ -15,7 +15,13 @@ extern uint32_t bevy_rs_spawn(BridgeWorld *world);
 extern bool bevy_rs_entity_exists(BridgeWorld *world, uint32_t entity);
 extern uint32_t bevy_rs_entity_generation(BridgeWorld *world, uint32_t entity);
 extern bool bevy_rs_despawn(BridgeWorld *world, uint32_t entity);
-extern bool bevy_rs_component_insert(BridgeWorld *world, uint32_t entity, uint32_t component, void *root);
+extern uint32_t bevy_rs_component_insert(
+    BridgeWorld *world,
+    uint32_t entity,
+    uint32_t component,
+    void *root,
+    bool reject_duplicate
+);
 extern void *bevy_rs_component_get(BridgeWorld *world, uint32_t entity, uint32_t component);
 extern bool bevy_rs_component_has(BridgeWorld *world, uint32_t entity, uint32_t component);
 extern bool bevy_rs_component_remove(BridgeWorld *world, uint32_t entity, uint32_t component);
@@ -140,31 +146,33 @@ HL_PRIM bool HL_NAME(despawn)(bevy_world *world, int entity) {
         && bevy_rs_despawn(world->rust, (uint32_t)entity);
 }
 
-HL_PRIM bool HL_NAME(component_insert)(
+HL_PRIM int HL_NAME(component_insert)(
     bevy_world *world,
     int entity,
     int component,
-    vdynamic *value
+    vdynamic *value,
+    bool reject_duplicate
 ) {
     bevy_hl_root *root;
-    bool inserted;
+    uint32_t result;
     if (world == NULL || world->rust == NULL || component < 0 || value == NULL) {
-        return false;
+        return 0;
     }
     root = bevy_hl_root_create(value);
     if (root == NULL) {
-        return false;
+        return 0;
     }
-    inserted = bevy_rs_component_insert(
+    result = bevy_rs_component_insert(
         world->rust,
         (uint32_t)entity,
         (uint32_t)component,
-        root
+        root,
+        reject_duplicate
     );
-    if (!inserted) {
+    if (result != 1) {
         bevy_hl_root_release(root);
     }
-    return inserted;
+    return (int)result;
 }
 
 HL_PRIM vdynamic *HL_NAME(component_get)(bevy_world *world, int entity, int component) {
@@ -267,7 +275,7 @@ DEFINE_PRIM(_I32, spawn, _BEVY_WORLD);
 DEFINE_PRIM(_BOOL, entity_exists, _BEVY_WORLD _I32);
 DEFINE_PRIM(_I32, entity_generation, _BEVY_WORLD _I32);
 DEFINE_PRIM(_BOOL, despawn, _BEVY_WORLD _I32);
-DEFINE_PRIM(_BOOL, component_insert, _BEVY_WORLD _I32 _I32 _DYN);
+DEFINE_PRIM(_I32, component_insert, _BEVY_WORLD _I32 _I32 _DYN _BOOL);
 DEFINE_PRIM(_DYN, component_get, _BEVY_WORLD _I32 _I32);
 DEFINE_PRIM(_BOOL, component_has, _BEVY_WORLD _I32 _I32);
 DEFINE_PRIM(_BOOL, component_remove, _BEVY_WORLD _I32 _I32);

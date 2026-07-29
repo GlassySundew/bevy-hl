@@ -16,7 +16,10 @@ use bevy_ecs::{
     query::{QueryBuilder, QueryState},
 };
 
-pub const BRIDGE_VERSION: u32 = 4;
+pub const BRIDGE_VERSION: u32 = 5;
+pub const COMPONENT_INSERT_FAILED: u32 = 0;
+pub const COMPONENT_INSERTED: u32 = 1;
+pub const COMPONENT_INSERT_DUPLICATE: u32 = 2;
 
 #[cfg(not(test))]
 unsafe extern "C" {
@@ -228,24 +231,28 @@ pub unsafe extern "C" fn bevy_rs_component_insert(
     handle: u32,
     component: u32,
     root: *mut c_void,
-) -> bool {
+    reject_duplicate: bool,
+) -> u32 {
     let Some(world) = world_mut(world) else {
-        return false;
+        return COMPONENT_INSERT_FAILED;
     };
     let (Some(entity), Some(component)) = (world.entity(handle), world.component_id(component))
     else {
-        return false;
+        return COMPONENT_INSERT_FAILED;
     };
     let Ok(mut entity_mut) = world.world.get_entity_mut(entity) else {
-        return false;
+        return COMPONENT_INSERT_FAILED;
     };
+    if reject_duplicate && entity_mut.contains_id(component) {
+        return COMPONENT_INSERT_DUPLICATE;
+    }
 
     OwningPtr::make(root, |ptr| {
         // SAFETY: component was registered by this bridge with pointer layout,
         // belongs to this world, and ptr points to that exact pointer value.
         unsafe { entity_mut.insert_by_id(component, ptr) };
     });
-    true
+    COMPONENT_INSERTED
 }
 
 #[unsafe(no_mangle)]
@@ -469,5 +476,40 @@ mod tests {
         );
         assert!(bridge.component_id(bridge_id).is_some());
         assert!(bridge.component_id(0).is_none());
+    }
+
+    #[test]
+    fn dynamic_insert_can_reject_duplicate_without_replacing_it() {
+        let mut bridge = BridgeWorld::new();
+        let bridge_ptr = &mut bridge as *mut BridgeWorld;
+        let name = CString::new("test.Position").unwrap();
+        let bridge_id = 7;
+        unsafe {
+            bevy_rs_component_register(bridge_ptr, bridge_id, name.as_ptr(), false);
+        }
+        let handle = unsafe { bevy_rs_spawn(bridge_ptr) };
+        let first = std::ptr::without_provenance_mut::<c_void>(1);
+        let second = std::ptr::without_provenance_mut::<c_void>(2);
+
+        assert_eq!(
+            unsafe { bevy_rs_component_insert(bridge_ptr, handle, bridge_id, first, true) },
+            COMPONENT_INSERTED
+        );
+        assert_eq!(
+            unsafe { bevy_rs_component_insert(bridge_ptr, handle, bridge_id, second, true) },
+            COMPONENT_INSERT_DUPLICATE
+        );
+        assert_eq!(
+            unsafe { bevy_rs_component_get(bridge_ptr, handle, bridge_id) },
+            first
+        );
+        assert_eq!(
+            unsafe { bevy_rs_component_insert(bridge_ptr, handle, bridge_id, second, false) },
+            COMPONENT_INSERTED
+        );
+        assert_eq!(
+            unsafe { bevy_rs_component_get(bridge_ptr, handle, bridge_id) },
+            second
+        );
     }
 }
