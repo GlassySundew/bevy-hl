@@ -219,6 +219,22 @@ class System {
 		return WorldMacro.get( macro $ethis.world, entity, componentType );
 	}
 
+	/** Explicitly replaces component values, bypassing the duplicate-add guard. */
+	private #if !macro macro #else static #end function replaceComponent(
+		ethis : ExprOf<System>,
+		entity : ExprOf<Entity>,
+		components : Array<Expr>
+	) : ExprOf<Entity> {
+
+		final target = macro __bevyEntity;
+		final operations = [for ( component in components ) WorldMacro.replace( macro $ethis.world, target, component )];
+		return macro {
+			final __bevyEntity:bevy.Entity = $entity;
+			$b{operations};
+			__bevyEntity;
+		};
+	}
+
 	private #if !macro macro #else static #end function hasComponent<T>(
 		ethis : ExprOf<System>,
 		entity : ExprOf<Entity>,

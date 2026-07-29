@@ -94,6 +94,14 @@ class Main {
 		if ( !duplicateAddRejected || world.get( moving, Position ).x != 1 )
 			throw "Duplicate component add check failed";
 		#end
+		final worldReplacement = new Position( 1, 2 );
+		if ( world.replace( moving, worldReplacement ) != worldReplacement
+			|| world.get( moving, Position ) != worldReplacement )
+			throw "World component replacement failed";
+		final entityReplacement = new Position( 1, 2 );
+		if ( moving.replace( world, entityReplacement ) != moving
+			|| world.get( moving, Position ) != entityReplacement )
+			throw "Fluent entity component replacement failed";
 		final primitiveQuery = world.getQuery( [PrimitiveFlag] );
 		if ( primitiveQuery.length != 1
 			|| ( cast primitiveQuery.componentStorages[0].get( moving ) : PrimitiveFlag ) != 3 )
@@ -117,6 +125,10 @@ class Main {
         final movingQuery = world.getQuery([Position, Velocity], [Sleeping]);
         if (movingQuery.entities.length != 1 || movingQuery.entities[0] != moving)
             throw "Persistent query entity snapshot failed";
+		final storageReplacement = new Velocity( 0.5, -1 );
+		if ( movingQuery.componentStorages[1].replace( moving, storageReplacement ) != storageReplacement
+			|| movingQuery.componentStorages[1].get( moving ) != storageReplacement )
+			throw "Dynamic component storage replacement failed";
         final queriedPosition:Position = movingQuery.componentStorages[0].get(moving);
         if (queriedPosition.x != 1 || moving.id != moving.handle)
             throw "Runtime query component view failed";
@@ -131,6 +143,10 @@ class Main {
             throw "Untyped query iteration failed";
 
         final movement = new MovementSystem(world);
+		final replacementPosition = new Position( 1, 2 );
+		if ( movement.replacePosition( moving, replacementPosition ) != moving
+			|| world.get( moving, Position ) != replacementPosition )
+			throw "Explicit component replacement failed";
         if (movement.priority != 10)
             throw "System macro did not collect class priority metadata";
         movement.activate();

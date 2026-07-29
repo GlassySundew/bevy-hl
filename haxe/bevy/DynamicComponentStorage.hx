@@ -48,6 +48,16 @@ class DynamicComponentStorage {
 		return value;
 	}
 
+	public function replace(
+		entity : Entity,
+		value : Dynamic,
+		?ignoredWorld : World
+	) : Dynamic {
+
+		world.replaceDynamic( entity, storageId, value );
+		return value;
+	}
+
 	public inline function remove(
 		entity : Entity,
 		?ignoredWorld : World

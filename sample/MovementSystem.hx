@@ -5,6 +5,11 @@ import bevy.System;
 class MovementSystem extends System {
     public var updates(default, null):Int = 0;
 
+	public function replacePosition( entity : Entity, position : Position ) : Entity {
+
+		return replaceComponent( entity, position );
+	}
+
     @:upd
     @:exclude(Sleeping)
     function move(position:Position, velocity:Velocity, entity:Entity, dt:Float):Void {

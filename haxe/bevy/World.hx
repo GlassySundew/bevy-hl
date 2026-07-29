@@ -260,6 +260,24 @@ class World {
 			throw 'Could not insert component $component into $entity';
 	}
 
+	/** Replaces a component without applying the duplicate-add guard. */
+	@:noCompletion public inline function replaceDynamic(
+		entity : Entity,
+		component : Int,
+		value : Dynamic
+	) : Void {
+
+		ensureOpen();
+		if ( Native.component_insert(
+			nativeHandle,
+			entity.handle,
+			component,
+			value,
+			false
+		) != Native.COMPONENT_INSERTED )
+			throw 'Could not replace component $component on $entity';
+	}
+
 	@:noCompletion public inline function getDynamic(
 		entity : Entity,
 		component : Int
@@ -352,6 +370,19 @@ class World {
 	) : ExprOf<T> {
 
 		return WorldMacro.add( ethis, entity, component );
+	}
+
+	/**
+	 * Explicitly replaces an entity's component value. This bypasses the
+	 * duplicate-add guard and retains Bevy's insert-if-absent behavior.
+	 */
+	public #if !macro macro #else static #end function replace<T>(
+		ethis : ExprOf<World>,
+		entity : ExprOf<Entity>,
+		component : ExprOf<T>
+	) : ExprOf<T> {
+
+		return WorldMacro.replace( ethis, entity, component );
 	}
 
 	public #if !macro macro #else static #end function get<T>(

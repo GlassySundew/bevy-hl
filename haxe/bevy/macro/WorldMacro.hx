@@ -18,6 +18,16 @@ class WorldMacro {
         };
     }
 
+    public static function replace(world:Expr, entity:Expr, component:Expr):Expr {
+        final info = componentFromValue(component);
+        final id = registration(world, info);
+        return macro {
+            final __bevyComponent = $component;
+            $world.replaceDynamic($entity, $id, __bevyComponent);
+            __bevyComponent;
+        };
+    }
+
     public static function addIfMissing(world:Expr, entity:Expr, component:Expr):Expr {
         final info = componentFromValue(component);
         final id = registration(world, info);
