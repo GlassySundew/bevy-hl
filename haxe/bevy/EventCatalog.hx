@@ -17,10 +17,17 @@ class EventCatalog {
 
 		final channels : Array<IEventChannel> = [];
 		for ( id in 0...factories.length ) {
-			final factory = factories[id];
-			if ( factory == null ) throw 'Missing event channel factory for id $id';
-			channels.push( factory() );
+			channels.push( createChannel( id ) );
 		}
 		return channels;
 	}
+
+	public static function createChannel( id : Int ) : IEventChannel {
+
+		final factory = factories[id];
+		if ( factory == null ) throw 'Missing event channel factory for id $id';
+		return factory();
+	}
+
+	public static inline function factoryCount() : Int return factories.length;
 }

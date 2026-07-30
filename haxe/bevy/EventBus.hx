@@ -13,9 +13,12 @@ class EventBus {
 	@:noCompletion
 	public inline function channelUntyped( id : Int ) : IEventChannel {
 
-		final channel = channels[id];
-		if ( channel == null )
-			throw 'Event channel $id was not registered before the world was created';
+		var channel = channels[id];
+		if ( channel == null ) {
+			while ( channels.length <= id )
+				channels.push( EventCatalog.createChannel( channels.length ) );
+			channel = channels[id];
+		}
 		return channel;
 	}
 
