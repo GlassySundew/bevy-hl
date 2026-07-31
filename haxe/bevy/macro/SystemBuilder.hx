@@ -418,7 +418,11 @@ class SystemBuilder {
 			registrations.push( macro {
 				final __bevyEventComponentIds : Array<Int> = [$a{componentIds}];
 				final __bevyEventExcludedIds : Array<Int> = [$a{excludedIds}];
-				final __bevyEventChannel : bevy.EventChannel<$type> = cast world.eventBus.channelUntyped( $v{listener.eventId} );
+				final __bevyEventChannel : bevy.EventChannel<$type> = cast world.eventBus.channelUntyped(
+					$v{listener.eventId},
+					function() : bevy.IEventChannel
+						return new bevy.EventChannel<$type>()
+				);
 				__addEventSubscription__( new bevy.EventSubscription<$type>(
 					__bevyEventChannel,
 					$callback

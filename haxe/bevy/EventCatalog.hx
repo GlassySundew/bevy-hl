@@ -13,11 +13,12 @@ class EventCatalog {
 		return true;
 	}
 
-	public static function createChannels() : Array<IEventChannel> {
+	public static function createChannels() : Array<Null<IEventChannel>> {
 
-		final channels : Array<IEventChannel> = [];
+		final channels : Array<Null<IEventChannel>> = [];
 		for ( id in 0...factories.length ) {
-			channels.push( createChannel( id ) );
+			final factory = factories[id];
+			channels.push( factory == null ? null : factory() );
 		}
 		return channels;
 	}

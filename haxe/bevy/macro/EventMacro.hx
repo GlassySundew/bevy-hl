@@ -25,7 +25,11 @@ class EventMacro {
         return macro {
             final __bevyEvent = $event;
             final __bevyEventChannel:bevy.EventChannel<$eventType> =
-                cast $world.eventBus.channelUntyped($v{eventId});
+                cast $world.eventBus.channelUntyped(
+                    $v{eventId},
+                    function() : bevy.IEventChannel
+                        return new bevy.EventChannel<$eventType>()
+                );
             __bevyEventChannel.emit(__bevyEvent, $offset);
             __bevyEvent;
         };

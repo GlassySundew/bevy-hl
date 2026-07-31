@@ -1,9 +1,9 @@
 package bevy;
 
-/** World-owned event channels, indexed by dense compile-time IDs. */
+/** World-owned event channels, indexed by compilation-server-stable event IDs. */
 class EventBus {
 
-	final channels : Array<IEventChannel>;
+	final channels : Array<Null<IEventChannel>>;
 
 	public function new() {
 
@@ -11,13 +11,18 @@ class EventBus {
 	}
 
 	@:noCompletion
-	public inline function channelUntyped( id : Int ) : IEventChannel {
+	public inline function channelUntyped(
+		id : Int,
+		?factory : Void -> IEventChannel
+	) : IEventChannel {
 
 		var channel = channels[id];
 		if ( channel == null ) {
-			while ( channels.length <= id )
-				channels.push( EventCatalog.createChannel( channels.length ) );
-			channel = channels[id];
+			channel = factory == null
+				? EventCatalog.createChannel( id )
+				: factory();
+			while ( channels.length <= id ) channels.push( null );
+			channels[id] = channel;
 		}
 		return channel;
 	}
@@ -25,12 +30,14 @@ class EventBus {
 	@:allow( bevy.World )
 	function advanceTick() : Void {
 
-		for ( channel in channels ) channel.advanceTick();
+		for ( channel in channels )
+			if ( channel != null ) channel.advanceTick();
 	}
 
 	@:allow( bevy.World )
 	function clear() : Void {
 
-		for ( channel in channels ) channel.clear();
+		for ( channel in channels )
+			if ( channel != null ) channel.clear();
 	}
 }

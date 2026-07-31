@@ -284,15 +284,15 @@ class Main {
 			|| world.activeSystems.find( ResourceSystem ) != null )
 			throw "Missing automatic resource did not reject system activation";
 
-		// Worlds synchronize event factories that are initialized after world creation.
+		// Typed call sites can create channels when generated descriptors are unavailable.
 		final lateEventBus = new bevy.EventBus();
 		final lateEventId = bevy.EventCatalog.factoryCount();
-		bevy.EventCatalog.registerFactory(
-			lateEventId,
-			function() : bevy.IEventChannel return new bevy.EventChannel<DamageEvent>()
-		);
 		final lateEventChannel : bevy.EventChannel<DamageEvent> =
-			cast lateEventBus.channelUntyped( lateEventId );
+			cast lateEventBus.channelUntyped(
+				lateEventId,
+				function() : bevy.IEventChannel
+					return new bevy.EventChannel<DamageEvent>()
+			);
 		lateEventChannel.emit( new DamageEvent( 42 ), 0 );
 		if ( lateEventChannel.current[0].amount != 42 )
 			throw "Late event factory synchronization failed";
