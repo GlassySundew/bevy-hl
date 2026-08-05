@@ -210,6 +210,22 @@ class System {
 		};
 	}
 
+	/** Adds component values only when their types are not already present. */
+	private #if !macro macro #else static #end function addComponentIfMissing(
+		ethis : ExprOf<System>,
+		entity : ExprOf<Entity>,
+		components : Array<Expr>
+	) : ExprOf<Entity> {
+
+		final target = macro __bevyEntity;
+		final operations = [for ( component in components ) WorldMacro.addIfMissing( macro $ethis.world, target, component )];
+		return macro {
+			final __bevyEntity:bevy.Entity = $entity;
+			$b{operations};
+			__bevyEntity;
+		};
+	}
+
 	private #if !macro macro #else static #end function getComponent<T>(
 		ethis : ExprOf<System>,
 		entity : ExprOf<Entity>,

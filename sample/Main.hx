@@ -143,6 +143,16 @@ class Main {
             throw "Untyped query iteration failed";
 
         final movement = new MovementSystem(world);
+		final conditionallyAddedEntity = world.spawn();
+		final conditionallyAddedPosition = new Position( 8, 9 );
+		if ( movement.addPositionIfMissing( conditionallyAddedEntity, conditionallyAddedPosition ) != conditionallyAddedEntity
+			|| world.get( conditionallyAddedEntity, Position ) != conditionallyAddedPosition )
+			throw "System addComponentIfMissing did not add a missing component";
+		final ignoredPosition = new Position( 80, 90 );
+		if ( movement.addPositionIfMissing( conditionallyAddedEntity, ignoredPosition ) != conditionallyAddedEntity
+			|| world.get( conditionallyAddedEntity, Position ) != conditionallyAddedPosition )
+			throw "System addComponentIfMissing replaced an existing component";
+		world.despawn( conditionallyAddedEntity );
 		final replacementPosition = new Position( 1, 2 );
 		if ( movement.replacePosition( moving, replacementPosition ) != moving
 			|| world.get( moving, Position ) != replacementPosition )

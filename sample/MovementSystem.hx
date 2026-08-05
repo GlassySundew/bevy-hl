@@ -10,6 +10,11 @@ class MovementSystem extends System {
 		return replaceComponent( entity, position );
 	}
 
+	public function addPositionIfMissing( entity : Entity, position : Position ) : Entity {
+
+		return addComponentIfMissing( entity, position );
+	}
+
     @:upd
     @:exclude(Sleeping)
     function move(position:Position, velocity:Velocity, entity:Entity, dt:Float):Void {
