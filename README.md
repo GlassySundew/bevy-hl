@@ -118,7 +118,7 @@ sample\run.bat
 
 The sample runner builds `bevy.hdll`, compiles `sample.hxml`, copies the native
 library beside the bytecode for execution, and removes that copy afterwards.
-It uses this checkout's Debug HashLink executable; the bridge itself is built
+It will use your HashLink executable; the bridge itself is built
 in Release mode.
 
 For library usage in haxe project:
