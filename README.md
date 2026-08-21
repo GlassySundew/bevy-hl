@@ -103,7 +103,7 @@ component operations structurally change the world.
 
 Requirements for the checked-in Windows setup:
 
-- HashLink source/build at `C:\Users\glassysundew\hashlink`
+- HashLink source/build
 - Haxe on `PATH`
 - CMake and Visual Studio 2019 C++ tools
 - Rust 1.95.0 (selected by `rust-toolchain.toml`)
