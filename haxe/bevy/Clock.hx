@@ -38,7 +38,7 @@ class Clock {
 	public function next() : Float {
 
 		final fixed = minTickLength == maxTickLength;
-		final tick = //
+		final tick =
 			if ( fixed && time + minTickLength * RELATIVE_EPSILON >= minTickLength )
 				minTickLength
 			else
