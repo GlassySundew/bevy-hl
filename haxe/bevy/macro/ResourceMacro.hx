@@ -64,7 +64,7 @@ class ResourceMacro {
 			case EField( parent, field ):
 				final prefix = fieldChain( parent );
 				prefix == null ? null : '$prefix.$field';
-			case EParenthesis( inner ): fieldChain( inner );
+			case EParenthesis( inner ) | EDisplay( inner, _ ): fieldChain( inner );
 			default: null;
 		}
 	}

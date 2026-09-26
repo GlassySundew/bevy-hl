@@ -14,6 +14,9 @@ class EventTypeRegistry {
 	public static function register( type : Type, pos : Position ) : Int {
 
 		final key = TypeTools.toString( type );
+		if ( Context.defined( "display" ) )
+			return DisplayTypeId.fromName( key );
+
 		final existing = ids.get( key );
 		if ( existing != null ) return existing;
 

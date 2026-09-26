@@ -27,26 +27,42 @@ abstract Entity( Int ) from Int to Int {
 	}
 
 	public #if !macro macro #else static #end function exists(
-		ethis : ExprOf<Entity>, world : ExprOf<World>, ?componentType : Expr
+		ethis : ExprOf<Entity>,
+		world : ExprOf<World>,
+		?componentType : Expr
 	) : ExprOf<Bool> {
 
-		if ( componentType == null || switch componentType.expr {
-			case EConst( CIdent( "null" ) ): true;
-			default: false;
-		} ) return macro $world.entityExists( $ethis );
+		if (
+			componentType == null
+			|| switch componentType.expr {
+
+				case EConst( CIdent( "null" ) ):
+					true;
+
+				default:
+					false;
+			}
+		)
+			return macro $world.entityExists( $ethis );
+
 		return WorldMacro.has( world, ethis, componentType );
 	}
 
 	public #if !macro macro #else static #end function add(
-		ethis : ExprOf<Entity>, world : ExprOf<World>, components : Array<Expr>
+		ethis : ExprOf<Entity>,
+		world : ExprOf<World>,
+		components : Array<Expr>
 	) : ExprOf<Entity> {
 
 		final entity = macro __bevyEntity;
 		final targetWorld = macro __bevyWorld;
-		final operations = [for ( component in components ) WorldMacro.add( targetWorld, entity, component )];
+		final operations = [
+			for ( component in components )
+				WorldMacro.add( targetWorld, entity, component )
+		];
 		return macro {
-			final __bevyEntity:bevy.Entity = $ethis;
-			final __bevyWorld:bevy.World = $world;
+			final __bevyEntity : bevy.Entity = $ethis;
+			final __bevyWorld : bevy.World = $world;
 			$b{operations};
 			__bevyEntity;
 		};
@@ -58,10 +74,13 @@ abstract Entity( Int ) from Int to Int {
 
 		final entity = macro __bevyEntity;
 		final targetWorld = macro __bevyWorld;
-		final operations = [for ( component in components ) WorldMacro.addIfMissing( targetWorld, entity, component )];
+		final operations = [
+			for ( component in components )
+				WorldMacro.addIfMissing( targetWorld, entity, component )
+		];
 		return macro {
-			final __bevyEntity:bevy.Entity = $ethis;
-			final __bevyWorld:bevy.World = $world;
+			final __bevyEntity : bevy.Entity = $ethis;
+			final __bevyWorld : bevy.World = $world;
 			$b{operations};
 			__bevyEntity;
 		};
@@ -69,37 +88,49 @@ abstract Entity( Int ) from Int to Int {
 
 	/** Explicitly replaces component values, bypassing the duplicate-add guard. */
 	public #if !macro macro #else static #end function replace(
-		ethis : ExprOf<Entity>, world : ExprOf<World>, components : Array<Expr>
+		ethis : ExprOf<Entity>,
+		world : ExprOf<World>,
+		components : Array<Expr>
 	) : ExprOf<Entity> {
 
 		final entity = macro __bevyEntity;
 		final targetWorld = macro __bevyWorld;
-		final operations = [for ( component in components ) WorldMacro.replace( targetWorld, entity, component )];
+		final operations = [
+			for ( component in components )
+				WorldMacro.replace( targetWorld, entity, component )
+		];
 		return macro {
-			final __bevyEntity:bevy.Entity = $ethis;
-			final __bevyWorld:bevy.World = $world;
+			final __bevyEntity : bevy.Entity = $ethis;
+			final __bevyWorld : bevy.World = $world;
 			$b{operations};
 			__bevyEntity;
 		};
 	}
 
 	public #if !macro macro #else static #end function get<T>(
-		ethis : ExprOf<Entity>, world : ExprOf<World>, componentType : ExprOf<Class<T>>
+		ethis : ExprOf<Entity>,
+		world : ExprOf<World>,
+		componentType : ExprOf<Class<T>>
 	) : ExprOf<Null<T>> {
 
 		return WorldMacro.get( world, ethis, componentType );
 	}
 
 	public #if !macro macro #else static #end function remove(
-		ethis : ExprOf<Entity>, world : ExprOf<World>, componentTypes : Array<Expr>
+		ethis : ExprOf<Entity>,
+		world : ExprOf<World>,
+		componentTypes : Array<Expr>
 	) : ExprOf<Entity> {
 
 		final entity = macro __bevyEntity;
 		final targetWorld = macro __bevyWorld;
-		final operations = [for ( componentType in componentTypes ) WorldMacro.remove( targetWorld, entity, componentType )];
+		final operations = [
+			for ( componentType in componentTypes )
+				WorldMacro.remove( targetWorld, entity, componentType )
+		];
 		return macro {
-			final __bevyEntity:bevy.Entity = $ethis;
-			final __bevyWorld:bevy.World = $world;
+			final __bevyEntity : bevy.Entity = $ethis;
+			final __bevyWorld : bevy.World = $world;
 			$b{operations};
 			__bevyEntity;
 		};

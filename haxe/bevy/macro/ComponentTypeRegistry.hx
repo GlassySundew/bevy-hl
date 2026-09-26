@@ -22,6 +22,14 @@ class ComponentTypeRegistry {
 	public static function register( type : Type, pos : Position ) : RegisteredComponent {
 
 		final name = TypeTools.toString( type );
+		if ( Context.defined( "display" ) )
+			return create(
+				type,
+				name,
+				DisplayTypeId.fromName( name ),
+				pos
+			);
+
 		final resources = Context.getResources();
 		var recoveredId : Null<Int> = null;
 		final occupied : Map<Int, String> = [];
@@ -52,10 +60,12 @@ class ComponentTypeRegistry {
 			assignedId = 0;
 			while ( occupied.exists( assignedId ) ) assignedId++;
 		}
-		return createAndBind( type, name, assignedId, pos );
+		final component = create( type, name, assignedId, pos );
+		bindDescriptorResource( component );
+		return component;
 	}
 
-	static function createAndBind(
+	static function create(
 		type : Type,
 		name : String,
 		id : Int,
@@ -71,7 +81,6 @@ class ComponentTypeRegistry {
 			complexType : complexType,
 			sparse : hasSparseMetadata( type )
 		};
-		bindDescriptorResource( component );
 		return component;
 	}
 
