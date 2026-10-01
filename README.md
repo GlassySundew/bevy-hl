@@ -258,14 +258,14 @@ world.send(new DamageEvent(entity, 5), 1);    // next tick
 emitEvent(new DamageEvent(entity, 5), 2);     // two ticks later, inside a System
 ```
 
-The event macro assigns every discovered event type an integer ID. The
-type-name-to-ID map exists only in the macro process and remains stable when the
-Haxe compilation server reuses typed modules. Runtime IDs may therefore be
-sparse. Each generated handler and emitter carries its typed channel factory,
-allowing a world to create a missing `EventChannel<T>` on first use even when a
-generated descriptor module was not emitted by an incremental build. Emission
-still uses direct array indexing, and channel payload arrays and listener
-callbacks remain typed rather than `Dynamic`.
+The event macro assigns every discovered event type an integer ID. Module-bound
+resources restore this mapping when the Haxe compilation server reuses typed
+modules, so incremental compilation does not depend on macro process state or
+typing order. Runtime IDs may therefore be sparse. Each generated handler and
+emitter carries its typed channel factory, allowing a world to create a missing
+`EventChannel<T>` on first use. Emission still uses direct array indexing, and
+channel payload arrays and listener callbacks remain typed rather than
+`Dynamic`.
 
 Delivery has deterministic tick semantics:
 

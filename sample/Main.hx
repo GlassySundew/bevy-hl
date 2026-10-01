@@ -294,7 +294,7 @@ class Main {
 			|| world.activeSystems.find( ResourceSystem ) != null )
 			throw "Missing automatic resource did not reject system activation";
 
-		// Typed call sites can create channels when generated descriptors are unavailable.
+		// Typed call sites can create channels without a pre-registered factory.
 		final lateEventBus = new bevy.EventBus();
 		final lateEventId = bevy.EventCatalog.factoryCount();
 		final lateEventChannel : bevy.EventChannel<DamageEvent> =

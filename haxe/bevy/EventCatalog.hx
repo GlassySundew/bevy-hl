@@ -1,6 +1,6 @@
 package bevy;
 
-/** Runtime factory table populated by generated event descriptors. */
+/** Optional runtime factory table for channels registered before a world starts. */
 @:noCompletion
 class EventCatalog {
 
