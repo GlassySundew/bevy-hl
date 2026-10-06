@@ -8,5 +8,8 @@ class EntityHandle {
 	public var ent : Null<Entity>;
 	public var gen : Int;
 
-	public inline function toString() : String return 'ent : $ent, gen : $gen';
+	public inline function toString() : String {
+
+		return 'ent : $ent, gen : $gen';
+	}
 }
