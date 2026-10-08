@@ -12,4 +12,9 @@ class EntityHandle {
 
 		return 'ent : $ent, gen : $gen';
 	}
+
+	public inline function equals( handle : EntityHandle ) {
+
+		return handle.ent == ent && handle.gen == gen;
+	}
 }
